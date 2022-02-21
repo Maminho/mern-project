@@ -44,7 +44,7 @@ module.exports.deleteUser = async (req, res) => {
     return res.status(400).send("ID unknown : " + req.params.id);
 
   try {
-    await UserModel.remove({ _id: req.params.id }).exec();
+    await UserModel.findOneAndRemove({ _id: req.params.id }).exec();
     res.status(200).json({ message: "Successfully deleted. " });
   } catch (err) {
     return res.status(500).json({ message: err });
@@ -60,7 +60,7 @@ module.exports.follow = async (req, res) => {
 
   try {
     // add to the follower list
-    await UserModel.findByIdAndUpdate(
+    await UserModel.findOneAndUpdate(
       req.params.id,
       { $addToSet: { following: req.body.idToFollow } },
       { new: true, upsert: true },
@@ -70,7 +70,7 @@ module.exports.follow = async (req, res) => {
       }
     ),
       // add to following list
-      await UserModel.findByIdAndUpdate(
+      await UserModel.findOneAndUpdate(
         req.body.idToFollow,
         { $addToSet: { followers: req.params.id } },
         { new: true, upsert: true },
@@ -92,7 +92,7 @@ module.exports.unfollow = async (req, res) => {
     return res.status(400).send("ID unknown : " + req.params.id);
 
   try {
-    await UserModel.findByIdAndUpdate(
+    await UserModel.findOneAndUpdate(
       req.params.id,
       { $pull: { following: req.body.idToUnfollow } },
       { new: true, upsert: true },
@@ -102,7 +102,7 @@ module.exports.unfollow = async (req, res) => {
       }
     ),
       // remove to following list
-      await UserModel.findByIdAndUpdate(
+      await UserModel.findOneAndUpdate(
         req.body.idToUnfollow,
         { $pull: { followers: req.params.id } },
         { new: true, upsert: true },
